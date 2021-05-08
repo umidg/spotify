@@ -1,0 +1,55 @@
+.genre-list {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  /* width: 33%; */
+}
+
+.tooltip {
+  visibility: hidden;
+  position: relative;
+  top: -50%;
+
+  color: white;
+  background-color: rgb(37, 150, 80);
+  padding: 5px;
+  font-size: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.genre-list > * {
+  flex: 0 0 100px;
+}
+
+.genre-list img {
+  width: 90px;
+  cursor: pointer;
+  transition: 0.5s;
+  opacity: 1;
+}
+
+.genre-list .genre-image:hover img {
+  z-index: 10;
+  opacity: 0.5;
+}
+
+.genre-list .genre-image:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.all-music {
+  display: flex;
+  /* width: 33%; */
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.all-music > * {
+  flex: 0 1 110px;
+}
+
+.all-music .each-music img {
+  width: 100px;
+}
