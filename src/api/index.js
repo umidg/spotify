@@ -27,7 +27,7 @@ export const _getGenres = async (token) => {
   );
 
   const data = await result.json();
-  return data.categories.items;
+  return data.categories;
 };
 
 export const _getPlaylistByGenre = async (genreId, token, limit) => {

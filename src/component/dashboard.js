@@ -3,13 +3,24 @@ import { useSelector } from "react-redux";
 import { _getGenres, _getToken, _getPlaylistByGenre } from "../api/index";
 import "./style.css";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { useDispatch } from "react-redux";
+import { setLists } from "../redux/actions/listActions";
+import _ from "lodash";
 const DashBoard = () => {
-  const lists = useSelector((state) => state.allLists.list);
+  const lists = useSelector((state) => state.allLists.lists);
+
   const [token, settoken] = useState(null);
   const [genres, setgenres] = useState(null);
   const [selectedGenre, setselectedGenre] = useState(null);
   const [musicList, setmusicList] = useState(null);
+  // musics = musicList.items
+  const [musics, setmusics] = useState(null);
   const [limit, setlimit] = useState(20);
+  // myPlaylist
+  const [myPlaylist, setmyPlaylist] = useState(null);
+
+  const dispatch = useDispatch();
+  console.log(lists, "list outside");
 
   useEffect(() => {
     _getToken()
@@ -18,12 +29,15 @@ const DashBoard = () => {
         _getGenres(token)
           .then((data) => {
             setgenres(data);
-            setselectedGenre(data[0].id);
+            setselectedGenre(data.items[0].id);
             console.log(data, "Genre");
-            _getPlaylistByGenre(data[0].id, token, limit).then((music) => {
-              setmusicList(music);
-              console.log(music, "music");
-            });
+            _getPlaylistByGenre(data.items[0].id, token, limit).then(
+              (music) => {
+                console.log(music, "music");
+                setmusicList(music);
+                // setmusics(music.items);
+              }
+            );
           })
           .catch((err) => {
             console.log(err, "Error while getting Genre");
@@ -32,12 +46,15 @@ const DashBoard = () => {
       .catch((err) => {
         console.log(err, "Error while getting token");
       });
+    console.log(lists, "list outside");
+    setmyPlaylist(lists);
   }, []);
 
   const selectGenre = (id) => {
     _getPlaylistByGenre(id, token, limit).then((music) => {
       setselectedGenre(id);
       setmusicList(music);
+      setmusics(music.items);
       setlimit(20);
       console.log(music, "music after select");
     });
@@ -66,29 +83,35 @@ const DashBoard = () => {
     if (!destination) {
       return;
     }
-    const sInd = +source.droppableId;
-    const dInd = +destination.droppableId;
 
-    console.log(result, "result");
+    const sInd = source.droppableId;
+    const dInd = destination.droppableId;
+
+    if (
+      result.source.droppableId == "drop" &&
+      result.destination.droppableId == "droppable"
+    ) {
+      let sourceArr = Array.from(musicList.items);
+      let destArr;
+      if (myPlaylist) destArr = Array.from(myPlaylist);
+      else {
+        destArr = [];
+      }
+      console.log(result.destination);
+      const [reorderedItem] = sourceArr.splice(result.source.index, 1);
+      console.log(reorderedItem, "reorder");
+
+      destArr.push(reorderedItem);
+      console.log(destArr, "before uni");
+      let temp = _.uniq(destArr);
+      console.log(temp, "temp");
+      setmyPlaylist(temp);
+      dispatch(setLists(temp));
+    }
   }
 
-  const getItemStyle = (isDragging, draggableStyle) => ({
-    // some basic styles to make the items look a bit nicer
-    userSelect: "none",
-    // padding: grid * 2,
-    // margin: `0 0 ${grid}px 0`,
-
-    // change background colour if dragging
-    // background: isDragging ? "lightgreen" : "grey",
-
-    // styles we need to apply on draggables
-    ...draggableStyle,
-  });
-
   const getListStyle = (isDraggingOver) => ({
-    background: isDraggingOver ? "lightblue" : "lightgrey",
-    // padding: grid,
-    // width: 250,
+    background: "lightgrey",
   });
 
   return (
@@ -107,10 +130,11 @@ const DashBoard = () => {
           </div>
           <div className="genre-list">
             {genres &&
-              genres.length &&
-              genres.map((node) => {
+              genres.items.length &&
+              genres.items.map((node, i) => {
                 return (
                   <div
+                    key={i}
                     className="genre-image"
                     onClick={() => selectGenre(node.id)}
                   >
@@ -126,64 +150,106 @@ const DashBoard = () => {
             <div className="heading">
               <h4>Select any Song</h4>
             </div>
-            <Droppable key="1" droppableId={`drop`}>
+
+            <Droppable droppableId={`drop`} key="1">
               {(provided, snapshot) => (
                 <div
+                  className="characters"
+                  {...provided.droppableProps}
                   ref={provided.innerRef}
                   style={getListStyle(snapshot.isDraggingOver)}
-                  {...provided.droppableProps}
                 >
                   <div className="all-music">
                     {musicList &&
-                      musicList.items.map((node, i) => (
-                        <Draggable
-                          key={node.id}
-                          draggableId={node.id}
-                          index={i}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={getItemStyle(
-                                snapshot.isDragging,
-                                provided.draggableProps.style
+                      musicList.items.map((node, i) => {
+                        return (
+                          <>
+                            <Draggable
+                              key={node.id}
+                              draggableId={node.id}
+                              index={i}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <div className="each-music">
+                                    <img src={node.images[0].url} />
+                                  </div>
+                                </div>
                               )}
-                            >
-                              <div className="each-music">
-                                {/* {console.log(provided, snapshot)} */}
-                                <img src={node.images[0].url} />
-                              </div>
-                              {/* {musicList.items.length < musicList.total - 1 &&
-                          musicList.items.length == i + 1 && (
-                            <p
-                              style={{
-                                backgroundColor: "blue",
-                                color: "white",
-                                height: "100%",
-                              }}
-                              onClick={loadMore}
-                            >
-                              Load More
-                            </p>
-                          )} */}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                            </Draggable>
+                            {console.log(
+                              musicList.items.length,
+                              musicList.total
+                            )}
+                            {musicList.items.length - 1 == i &&
+                              musicList.total - 1 > limit && (
+                                <p key={limit} onClick={loadMore}>
+                                  Load More
+                                </p>
+                              )}
+                          </>
+                        );
+                      })}
                   </div>
+                  {provided.placeholder}
                 </div>
               )}
             </Droppable>
           </div>
+
           <div style={{ width: "33%" }}>
             <div className="heading">
               <h4>My playlist</h4>
             </div>
-            <div className="my-playlist">
-              <Droppable key="2" droppableId={`droppable`}>
-                {(provided, snapshot) => <div>Hello</div>}
+            <div>
+              <Droppable droppableId="droppable" key="1">
+                {(provided) => (
+                  <div
+                    className="characters"
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                  >
+                    <div
+                      className="all-music"
+                      style={{
+                        width: "100%",
+                        minHeight: "50vh",
+                        backgroundColor: "lightgray",
+                        margin: "5%",
+                      }}
+                    >
+                      {myPlaylist && myPlaylist.length > 0 ? (
+                        myPlaylist.map((node, i) => {
+                          return (
+                            <Draggable
+                              key={node.id}
+                              draggableId={node.id}
+                              index={i}
+                            >
+                              {(provided) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                >
+                                  <div className="each-music">
+                                    <img src={node.images[0].url} />
+                                  </div>
+                                </div>
+                              )}
+                            </Draggable>
+                          );
+                        })
+                      ) : (
+                        <p>Empty List... </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Droppable>
             </div>
           </div>

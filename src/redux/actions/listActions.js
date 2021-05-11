@@ -2,7 +2,7 @@ import { ActionTypes } from "../constants/action-types";
 
 export const setLists = (lists) => {
   return {
-    type: ActionTypes.SET_LISTS,
+    type: ActionTypes.SET_LIST,
     payload: lists,
   };
 };
