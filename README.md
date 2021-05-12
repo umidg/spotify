@@ -1,5 +1,7 @@
 # Getting Started with Create React App
 
+#Please set the env (./env) file with REACT_APP_CLIENT_ID = spotify client id, REACT_APP_CLIENT_SECRET= spotify client secret, REACT_APP_SPOTIFY_URL = https://api.spotify.com/v1/browse/categories
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
