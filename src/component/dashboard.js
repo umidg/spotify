@@ -94,26 +94,24 @@ const DashBoard = () => {
     ) {
       let sourceArr = musicList.items;
       let destArr;
-      if (myPlaylist) destArr = myPlaylist;
+      if (lists) destArr = lists;
       else {
         destArr = [];
       }
-      console.log(result.destination);
-      const [reorderedItem] = sourceArr.splice(result.source.index, 1);
+      console.log(result.source, "resource ");
+
+      const reorderedItem = sourceArr[result.source.index]; //sourceArr.splice(result.source.index, 1); //dragged song
       console.log(reorderedItem, "reorder");
       let id = reorderedItem.id;
       reorderedItem[id] = id;
 
-      if (destArr.length > 0)
-        destArr.map((node, i) => {
-          if (!node.hasOwnProperty(reorderedItem.id)) {
-            console.log(reorderedItem.hasOwnProperty(node.id), node.id);
-            destArr = [...destArr, reorderedItem];
-            setmyPlaylist(destArr);
-            dispatch(setLists(destArr));
-          }
-        });
-      else {
+      if (destArr.length > 0) {
+        destArr = [...destArr, reorderedItem];
+        let temp = _.uniqBy(destArr, "id");
+        console.log(temp, "temp");
+        setmyPlaylist(destArr);
+        dispatch(setLists(destArr));
+      } else {
         destArr.push(reorderedItem);
         setmyPlaylist(destArr);
         dispatch(setLists(destArr));

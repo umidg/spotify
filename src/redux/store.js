@@ -18,7 +18,7 @@ store.subscribe(
     saveState({
       lists: store.getState().allLists.lists,
     });
-  }, 500)
+  }, 1000)
 );
 
 export default store;
