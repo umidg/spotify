@@ -8,11 +8,11 @@ import store from "./redux/store";
 require("dotenv").config();
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </React.StrictMode>,
+  // <React>
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  // </React>,
   document.getElementById("root")
 );
 

@@ -1,3 +1,4 @@
+import _ from "lodash";
 export const loadstate = () => {
   try {
     const serializeState = localStorage.getItem("playlist");
@@ -13,7 +14,7 @@ export const loadstate = () => {
 
 export const saveState = (state) => {
   try {
-    const serializeState = JSON.stringify(state);
+    const serializeState = JSON.stringify(_.uniq(state));
     localStorage.setItem("playlist", serializeState);
   } catch (err) {}
 };

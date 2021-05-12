@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useDispatch } from "react-redux";
 import { setLists } from "../redux/actions/listActions";
 import _ from "lodash";
+import LoadingOverlay from "react-loading-overlay";
 const DashBoard = () => {
   const lists = useSelector((state) => state.allLists.lists);
 
@@ -46,7 +47,7 @@ const DashBoard = () => {
       .catch((err) => {
         console.log(err, "Error while getting token");
       });
-    console.log(lists, "list outside");
+    console.log(lists, "list inside");
     setmyPlaylist(lists);
   }, []);
 
@@ -91,22 +92,33 @@ const DashBoard = () => {
       result.source.droppableId == "drop" &&
       result.destination.droppableId == "droppable"
     ) {
-      let sourceArr = Array.from(musicList.items);
+      let sourceArr = musicList.items;
       let destArr;
-      if (myPlaylist) destArr = Array.from(myPlaylist);
+      if (myPlaylist) destArr = myPlaylist;
       else {
         destArr = [];
       }
       console.log(result.destination);
       const [reorderedItem] = sourceArr.splice(result.source.index, 1);
       console.log(reorderedItem, "reorder");
+      let id = reorderedItem.id;
+      reorderedItem[id] = id;
 
-      destArr.push(reorderedItem);
+      if (destArr.length > 0)
+        destArr.map((node, i) => {
+          if (!node.hasOwnProperty(reorderedItem.id)) {
+            console.log(reorderedItem.hasOwnProperty(node.id), node.id);
+            destArr = [...destArr, reorderedItem];
+            setmyPlaylist(destArr);
+            dispatch(setLists(destArr));
+          }
+        });
+      else {
+        destArr.push(reorderedItem);
+        setmyPlaylist(destArr);
+        dispatch(setLists(destArr));
+      }
       console.log(destArr, "before uni");
-      let temp = _.uniq(destArr);
-      console.log(temp, "temp");
-      setmyPlaylist(temp);
-      dispatch(setLists(temp));
     }
   }
 
@@ -117,6 +129,7 @@ const DashBoard = () => {
   return (
     <>
       {console.log("render")}
+
       <div style={{ display: "flex", width: "100%" }}>
         <div
           style={{
@@ -145,7 +158,7 @@ const DashBoard = () => {
               })}
           </div>
         </div>
-        <DragDropContext onDragEnd={onDragEnd}>
+        <DragDropContext onDragEnd={(e) => onDragEnd(e)}>
           <div style={{ width: "33%" }}>
             <div className="heading">
               <h4>Select any Song</h4>
@@ -222,8 +235,8 @@ const DashBoard = () => {
                         margin: "5%",
                       }}
                     >
-                      {myPlaylist && myPlaylist.length > 0 ? (
-                        myPlaylist.map((node, i) => {
+                      {lists && lists.length > 0 ? (
+                        lists.map((node, i) => {
                           return (
                             <Draggable
                               key={node.id}

@@ -5,6 +5,8 @@ import { loadstate, saveState } from "./localstorage";
 
 const persistedState = loadstate();
 
+console.log("store");
+
 const store = createStore(
   reducers,
   persistedState,
@@ -16,7 +18,7 @@ store.subscribe(
     saveState({
       lists: store.getState().allLists.lists,
     });
-  }, 1000)
+  }, 500)
 );
 
 export default store;

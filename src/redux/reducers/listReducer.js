@@ -9,9 +9,9 @@ const intitialState = {
 };
 
 export const listReducer = (state = intitialState, { type, payload }) => {
-  console.log(loadstate(), intitialState, "load");
   switch (type) {
     case ActionTypes.SET_LIST:
+      console.log("reduced ");
       return { ...state, lists: payload };
     default:
       return state;
